@@ -39,7 +39,8 @@ export default function Header() {
     { name: 'Terrasses', href: '/services/terrasses' },
     { name: 'Vitres', href: '/services/vitres' },
     { name: 'Canapés', href: '/services/canapes' },
-    { name: 'Après-construction', href: '/services/apres-construction' }
+    { name: 'Après-construction', href: '/services/apres-construction' },
+    { name: 'Admin', href: '/admin' }
   ];
 
   const handleServicesToggle = () => {
@@ -59,9 +60,9 @@ export default function Header() {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <Link href="/" className="flex items-center">
-            <img 
-              src="https://static.readdy.ai/image/35649d6e4e85d955ed4f7e483825eb28/3c7437a326e8f9f84684f8ca5264b0a5.jfif" 
-              alt="Lumina Clean Service" 
+            <img
+              src="https://static.readdy.ai/image/35649d6e4e85d955ed4f7e483825eb28/3c7437a326e8f9f84684f8ca5264b0a5.jfif"
+              alt="Lumina Clean Service"
               className="h-12 w-auto"
             />
           </Link>
@@ -70,16 +71,16 @@ export default function Header() {
             <Link href="/" className="text-gray-700 hover:text-blue-600 transition-colors whitespace-nowrap cursor-pointer">
               Accueil
             </Link>
-            
+
             <div className="relative" ref={dropdownRef}>
-              <button 
+              <button
                 className="text-gray-700 hover:text-blue-600 transition-colors whitespace-nowrap cursor-pointer flex items-center"
                 onClick={handleServicesToggle}
               >
                 Services
                 <i className="ri-arrow-down-s-line ml-1 w-4 h-4 flex items-center justify-center"></i>
               </button>
-              
+
               {isMounted && isServicesOpen && (
                 <div className="absolute top-full left-0 mt-2 w-64 bg-white rounded-lg shadow-lg z-50">
                   <div className="py-2">
@@ -103,14 +104,14 @@ export default function Header() {
             </Link>
           </nav>
 
-          <Link 
-            href="/contact" 
+          <Link
+            href="/contact"
             className="bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 transition-colors whitespace-nowrap cursor-pointer"
           >
             Demander un devis
           </Link>
 
-          <button 
+          <button
             className="md:hidden w-6 h-6 flex items-center justify-center cursor-pointer"
             onClick={handleMenuToggle}
           >
@@ -124,7 +125,7 @@ export default function Header() {
               <Link href="/" className="text-gray-700 hover:text-blue-600 transition-colors cursor-pointer">
                 Accueil
               </Link>
-              
+
               <div className="text-gray-500 font-medium">Services</div>
               {services.map((service) => (
                 <Link
@@ -136,7 +137,7 @@ export default function Header() {
                   {service.name}
                 </Link>
               ))}
-              
+
               <Link href="/contact" className="text-gray-700 hover:text-blue-600 transition-colors cursor-pointer">
                 Contact
               </Link>
