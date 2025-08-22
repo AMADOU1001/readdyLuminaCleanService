@@ -4,6 +4,8 @@ import { useRouter } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { useState } from "react";
 
+
+
 export default function SignOutButton() {
   const supabase = createSupabaseBrowserClient();
   const router = useRouter();
