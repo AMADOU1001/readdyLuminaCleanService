@@ -26,7 +26,16 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Lumina Clean - Services de nettoyage professionnel",
   description: "Services de nettoyage professionnel pour résidentiel, commercial, Airbnb et plus. Devis gratuit.",
+  themeColor: "#2563eb",
+  manifest: "/manifest.json",
+  icons: {
+    icon: "/icons/icon-512x512.png",          // favicon principal
+    apple: "/icons/icon-192x192.png",         // icône Apple
+    shortcut: "/icons/favicon-32x32.png",     // favicon pour navigateurs
+  },
 };
+
+
 
 export default function RootLayout({
   children,
@@ -38,6 +47,8 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${pacifico.variable} antialiased`}
       >
+
+
         <Header />
         <main className="min-h-screen">
           {children}

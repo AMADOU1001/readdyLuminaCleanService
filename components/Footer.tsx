@@ -12,17 +12,17 @@ export default function Footer() {
               Votre partenaire de confiance pour tous vos besoins de nettoyage professionnel au Québec.
             </p>
             <div className="flex space-x-3">
-              <a 
-                href="https://www.facebook.com/share/19C3ACUVGV/?mibextid=wwXIfr" 
-                target="_blank" 
+              <a
+                href="https://www.facebook.com/share/19C3ACUVGV/?mibextid=wwXIfr"
+                target="_blank"
                 rel="noopener noreferrer"
                 className="w-8 h-8 flex items-center justify-center bg-blue-600 rounded-full cursor-pointer hover:bg-blue-700 transition-colors"
               >
                 <i className="ri-facebook-fill text-sm"></i>
               </a>
-              <a 
-                href="https://www.instagram.com/lumina_clean_service?igsh=azdoMDY2MjlxazY2&utm_source=qr" 
-                target="_blank" 
+              <a
+                href="https://www.instagram.com/lumina_clean_service?igsh=azdoMDY2MjlxazY2&utm_source=qr"
+                target="_blank"
                 rel="noopener noreferrer"
                 className="w-8 h-8 flex items-center justify-center bg-gradient-to-r from-purple-500 to-pink-500 rounded-full cursor-pointer hover:from-purple-600 hover:to-pink-600 transition-colors"
               >
@@ -63,7 +63,7 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-gray-800 mt-6 pt-4 flex flex-col md:flex-row justify-between items-center text-sm text-gray-400">
-          <p> 2024 Lumina Clean. Tous droits réservés.</p>
+          <p> 2025 Lumina Clean. Tous droits réservés.</p>
           <div className="flex items-center space-x-4 mt-2 md:mt-0">
             <span>NEQ : 2279963633</span>
           </div>

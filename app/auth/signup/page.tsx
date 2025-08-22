@@ -2,10 +2,9 @@
 
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
-import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
+import { supabase } from "@/lib/supabase/browser";
 
 export default function SignupPage() {
-    const supabase = createSupabaseBrowserClient();
     const router = useRouter();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -22,12 +21,9 @@ export default function SignupPage() {
         console.log("SUPABASE_URL", process.env.NEXT_PUBLIC_SUPABASE_URL);
         console.log("SUPABASE_KEY", process.env.NEXT_PUBLIC_SUPABASE_KEY?.slice(0, 10) + "...");
 
-
         const { error } = await supabase.auth.signUp({
             email,
             password,
-            // Si la confirmation email est activée dans Supabase,
-            // l'utilisateur doit cliquer le lien de validation :
             options: {
                 emailRedirectTo:
                     typeof window !== "undefined"

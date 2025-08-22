@@ -39,8 +39,7 @@ export default function Header() {
     { name: 'Terrasses', href: '/services/terrasses' },
     { name: 'Vitres', href: '/services/vitres' },
     { name: 'Canapés', href: '/services/canapes' },
-    { name: 'Après-construction', href: '/services/apres-construction' },
-    { name: 'Admin', href: '/admin' }
+    { name: 'Après-construction', href: '/services/apres-construction' }
   ];
 
   const handleServicesToggle = () => {
