@@ -1,10 +1,10 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { supabase } from "@/lib/supabase/browser"; // ✅ un seul client
+import { supabase } from "@/lib/supabase/browser";
 
-export default function LoginPage() {
+function LoginForm() {
     const router = useRouter();
     const params = useSearchParams();
     const [email, setEmail] = useState("");
@@ -60,5 +60,13 @@ export default function LoginPage() {
                 </button>
             </form>
         </main>
+    );
+}
+
+export default function LoginPage() {
+    return (
+        <Suspense fallback={<p>Chargement...</p>}>
+            <LoginForm />
+        </Suspense>
     );
 }
