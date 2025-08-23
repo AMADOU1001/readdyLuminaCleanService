@@ -26,7 +26,6 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Lumina Clean - Services de nettoyage professionnel",
   description: "Services de nettoyage professionnel pour résidentiel, commercial, Airbnb et plus. Devis gratuit.",
-  themeColor: "#2563eb",
   manifest: "/manifest.json",
   icons: {
     icon: "/icons/icon-512x512.png",          // favicon principal
@@ -44,11 +43,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fr" suppressHydrationWarning={true}>
+      <head>
+        <meta name="theme-color" content="#2563eb" />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${pacifico.variable} antialiased`}
       >
-
-
         <Header />
         <main className="min-h-screen">
           {children}
