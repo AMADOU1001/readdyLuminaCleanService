@@ -10,7 +10,7 @@ import {
     ResponsiveContainer,
     CartesianGrid,
 } from "recharts";
-import { RefreshCw, LogOut } from "lucide-react";
+import { RefreshCw, LogOut, Plus, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase/browser";
 
@@ -83,17 +83,18 @@ const Stats = () => {
         <div className="bg-white rounded-xl shadow-lg p-4 sm:p-8">
             <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6">Statistiques</h3>
 
+            {/* Stats rapides */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                 <div className="bg-blue-50 p-3 sm:p-4 rounded-lg">
                     <p className="text-blue-600 font-semibold text-sm sm:text-base">Demandes du jour</p>
                     <p className="text-2xl font-bold text-blue-800">{stats.today}</p>
                 </div>
                 <div className="bg-green-50 p-3 sm:p-4 rounded-lg">
-                    <p className="text-green-600 font-semibold text-sm sm:text-base">Total cette semaine</p>
+                    <p className="text-green-600 font-semibold text-sm sm:text-base">Cette semaine</p>
                     <p className="text-2xl font-bold text-green-800">{stats.week}</p>
                 </div>
                 <div className="bg-purple-50 p-3 sm:p-4 rounded-lg">
-                    <p className="text-purple-600 font-semibold text-sm sm:text-base">Demandes de l'année</p>
+                    <p className="text-purple-600 font-semibold text-sm sm:text-base">Cette année</p>
                     <p className="text-2xl font-bold text-purple-800">{stats.year}</p>
                 </div>
                 <div className="bg-orange-50 p-3 sm:p-4 rounded-lg">
@@ -102,6 +103,7 @@ const Stats = () => {
                 </div>
             </div>
 
+            {/* Graphique mensuel */}
             <h4 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4">Demandes par mois</h4>
             <div className="h-64 sm:h-80">
                 <ResponsiveContainer width="100%" height="100%">
@@ -142,126 +144,45 @@ const SignOutButton = () => {
     );
 };
 
-// ✅ Formulaire d’ajout manuel
-function ManualAddForm({ onAdded }: { onAdded: () => void }) {
-    const [form, setForm] = useState({
-        nom: "",
-        email: "",
-        telephone: "",
-        message: "",
-    });
-    const [loading, setLoading] = useState(false);
-    const [status, setStatus] = useState<string | null>(null);
-
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        const { name, value } = e.target;
-        setForm((prev) => ({ ...prev, [name]: value }));
-    };
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setLoading(true);
-        setStatus(null);
-
-        if (!form.nom || !form.email || !form.telephone) {
-            setStatus("Veuillez remplir les champs obligatoires.");
-            setLoading(false);
-            return;
-        }
-
-        const { error } = await supabase.from("contacts").insert([form]);
-
-        if (error) {
-            console.error(error);
-            setStatus("Erreur lors de l'enregistrement.");
-        } else {
-            setStatus("Demande ajoutée avec succès !");
-            setForm({ nom: "", email: "", telephone: "", message: "" });
-            onAdded();
-        }
-
-        setLoading(false);
-    };
-
-    return (
-        <form
-            onSubmit={handleSubmit}
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4"
-        >
-            <input
-                type="text"
-                name="nom"
-                value={form.nom}
-                onChange={handleChange}
-                placeholder="Nom complet *"
-                className="border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500"
-            />
-            <input
-                type="tel"
-                name="telephone"
-                value={form.telephone}
-                onChange={handleChange}
-                placeholder="Téléphone *"
-                className="border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500"
-            />
-            <input
-                type="email"
-                name="email"
-                value={form.email}
-                onChange={handleChange}
-                placeholder="Email *"
-                className="border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500"
-            />
-            <textarea
-                name="message"
-                value={form.message}
-                onChange={handleChange}
-                placeholder="Message (optionnel)"
-                className="border rounded-lg px-3 py-2 text-sm sm:col-span-2 lg:col-span-4 focus:ring-2 focus:ring-blue-500 resize-none"
-            />
-            <button
-                type="submit"
-                disabled={loading}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200 font-semibold sm:col-span-2 lg:col-span-1"
-            >
-                {loading ? "Enregistrement..." : "Ajouter"}
-            </button>
-            {status && (
-                <p
-                    className={`text-sm sm:col-span-3 mt-2 ${status.includes("succès") ? "text-green-600" : "text-red-600"
-                        }`}
-                >
-                    {status}
-                </p>
-            )}
-        </form>
-    );
-}
-
+// ✅ Page Admin
 export default function AdminPage() {
     const router = useRouter();
     const [contacts, setContacts] = useState<Contact[]>([]);
     const [loading, setLoading] = useState(false);
     const [errorText, setErrorText] = useState<string | null>(null);
     const [authChecked, setAuthChecked] = useState(false);
+    const [showForm, setShowForm] = useState(false);
+    const [formData, setFormData] = useState({
+        nom: "",
+        email: "",
+        telephone: "",
+        message: "",
+    });
 
+    // Vérifie la session
     useEffect(() => {
         const checkAuth = async () => {
             const { data } = await supabase.auth.getSession();
-            if (!data.session) router.replace("/auth/login");
+            if (!data.session) {
+                router.replace("/auth/login");
+            }
             setAuthChecked(true);
         };
+
         checkAuth();
 
-        const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+        const {
+            data: { subscription },
+        } = supabase.auth.onAuthStateChange((_event, session) => {
             if (!session) router.replace("/auth/login");
         });
 
         return () => {
-            listener?.subscription.unsubscribe();
+            subscription.unsubscribe();
         };
     }, [router]);
 
+    // Récupère les contacts
     useEffect(() => {
         if (!authChecked) return;
         fetchContacts();
@@ -286,6 +207,7 @@ export default function AdminPage() {
                 .from("contacts")
                 .select("id, nom, email, telephone, message, created_at")
                 .order("created_at", { ascending: false });
+
             if (error) throw error;
             setContacts(data || []);
         } catch {
@@ -295,9 +217,21 @@ export default function AdminPage() {
         }
     };
 
-    if (!authChecked) {
-        return <div className="text-center py-10">Vérification de l'authentification...</div>;
-    }
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!formData.nom || !formData.email || !formData.telephone) return alert("Tous les champs sont requis.");
+
+        const { error } = await supabase.from("contacts").insert([formData]);
+        if (error) {
+            alert("Erreur lors de l’ajout du contact.");
+            console.error(error);
+        } else {
+            setFormData({ nom: "", email: "", telephone: "", message: "" });
+            setShowForm(false);
+        }
+    };
+
+    if (!authChecked) return <div className="text-center py-10">Vérification de l'authentification...</div>;
 
     return (
         <div className="min-h-screen bg-white">
@@ -308,9 +242,7 @@ export default function AdminPage() {
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-0 mb-6 sm:mb-8">
                             <div>
                                 <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold">Tableau de bord</h1>
-                                <p className="text-sm sm:text-base opacity-90 mt-1 sm:mt-2">
-                                    Demandes reçues via le formulaire
-                                </p>
+                                <p className="text-sm sm:text-base opacity-90 mt-1 sm:mt-2">Demandes reçues via le formulaire</p>
                             </div>
                             <SignOutButton />
                         </div>
@@ -322,41 +254,80 @@ export default function AdminPage() {
             <section className="py-8 sm:py-12 bg-gray-50">
                 <div className="container mx-auto px-4 sm:px-6 max-w-7xl">
                     <div className="bg-white rounded-xl shadow-lg">
-
-                        {/* ✅ Formulaire manuel */}
-                        <div className="p-4 sm:p-6 border-b bg-gray-50">
-                            <h3 className="text-lg font-semibold text-gray-800 mb-3">
-                                Ajouter une demande manuellement
-                            </h3>
-                            <ManualAddForm onAdded={fetchContacts} />
-                        </div>
-
                         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 sm:p-6 border-b gap-2 sm:gap-0">
-                            <h2 className="text-lg sm:text-2xl font-bold text-gray-900">
-                                Demandes de contact{" "}
-                                <span className="ml-1 sm:ml-2 text-gray-500 text-sm sm:text-base">
-                                    ({contacts.length})
-                                </span>
-                            </h2>
+                            <div className="flex items-center gap-3">
+                                <h2 className="text-lg sm:text-2xl font-bold text-gray-900">
+                                    Demandes de contact <span className="ml-1 text-gray-500 text-sm">({contacts.length})</span>
+                                </h2>
+                                <button
+                                    onClick={() => setShowForm((s) => !s)}
+                                    className="flex items-center justify-center bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg font-semibold transition text-sm"
+                                >
+                                    {showForm ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+                                </button>
+                            </div>
                             <button
                                 onClick={fetchContacts}
                                 disabled={loading}
-                                className="flex items-center gap-2 bg-blue-600 text-white px-3 py-2 sm:px-4 rounded-lg font-semibold hover:bg-blue-700 transition disabled:opacity-50 text-sm sm:text-base"
+                                className="flex items-center gap-2 bg-blue-600 text-white px-3 py-2 rounded-lg font-semibold hover:bg-blue-700 transition disabled:opacity-50 text-sm sm:text-base"
                             >
                                 <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
                                 Rafraîchir
                             </button>
                         </div>
 
+                        {/* ✅ Formulaire toggle */}
+                        {showForm && (
+                            <div className="p-6 border-b bg-gray-50">
+                                <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <input
+                                        type="text"
+                                        placeholder="Nom"
+                                        value={formData.nom}
+                                        onChange={(e) => setFormData({ ...formData, nom: e.target.value })}
+                                        className="border rounded-lg px-3 py-2"
+                                        required
+                                    />
+                                    <input
+                                        type="email"
+                                        placeholder="Email"
+                                        value={formData.email}
+                                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                        className="border rounded-lg px-3 py-2"
+                                        required
+                                    />
+                                    <input
+                                        type="tel"
+                                        placeholder="Téléphone"
+                                        value={formData.telephone}
+                                        onChange={(e) => setFormData({ ...formData, telephone: e.target.value })}
+                                        className="border rounded-lg px-3 py-2"
+                                        required
+                                    />
+                                    <textarea
+                                        placeholder="Message"
+                                        value={formData.message}
+                                        onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                                        className="border rounded-lg px-3 py-2 md:col-span-2"
+                                    />
+                                    <button
+                                        type="submit"
+                                        className="bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded-lg md:col-span-2"
+                                    >
+                                        Ajouter le contact
+                                    </button>
+                                </form>
+                            </div>
+                        )}
+
+                        {/* Tableau existant */}
                         <div className="p-2 sm:p-6 overflow-x-auto">
                             {errorText ? (
                                 <div className="p-4 bg-red-50 text-red-700 rounded">{errorText}</div>
                             ) : loading ? (
                                 <div className="text-center py-8">Chargement...</div>
                             ) : contacts.length === 0 ? (
-                                <div className="text-center py-8 text-gray-500">
-                                    Aucune demande pour le moment.
-                                </div>
+                                <div className="text-center py-8 text-gray-500">Aucune demande pour le moment.</div>
                             ) : (
                                 <table className="min-w-[600px] w-full table-auto text-sm sm:text-base">
                                     <thead className="bg-blue-600 text-white">
