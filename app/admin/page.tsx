@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-
 import {
     BarChart,
     Bar,
@@ -83,7 +82,7 @@ const Stats = () => {
     return (
         <div className="bg-white rounded-xl shadow-lg p-4 sm:p-8">
             <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6">Statistiques</h3>
-            {/* Stats rapides */}
+
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                 <div className="bg-blue-50 p-3 sm:p-4 rounded-lg">
                     <p className="text-blue-600 font-semibold text-sm sm:text-base">Demandes du jour</p>
@@ -103,7 +102,6 @@ const Stats = () => {
                 </div>
             </div>
 
-            {/* Graphique mensuel */}
             <h4 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4">Demandes par mois</h4>
             <div className="h-64 sm:h-80">
                 <ResponsiveContainer width="100%" height="100%">
@@ -144,6 +142,102 @@ const SignOutButton = () => {
     );
 };
 
+// ✅ Formulaire d’ajout manuel
+function ManualAddForm({ onAdded }: { onAdded: () => void }) {
+    const [form, setForm] = useState({
+        nom: "",
+        email: "",
+        telephone: "",
+        message: "",
+    });
+    const [loading, setLoading] = useState(false);
+    const [status, setStatus] = useState<string | null>(null);
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const { name, value } = e.target;
+        setForm((prev) => ({ ...prev, [name]: value }));
+    };
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+        setStatus(null);
+
+        if (!form.nom || !form.email || !form.telephone) {
+            setStatus("Veuillez remplir les champs obligatoires.");
+            setLoading(false);
+            return;
+        }
+
+        const { error } = await supabase.from("contacts").insert([form]);
+
+        if (error) {
+            console.error(error);
+            setStatus("Erreur lors de l'enregistrement.");
+        } else {
+            setStatus("Demande ajoutée avec succès !");
+            setForm({ nom: "", email: "", telephone: "", message: "" });
+            onAdded();
+        }
+
+        setLoading(false);
+    };
+
+    return (
+        <form
+            onSubmit={handleSubmit}
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4"
+        >
+            <input
+                type="text"
+                name="nom"
+                value={form.nom}
+                onChange={handleChange}
+                placeholder="Nom complet *"
+                className="border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500"
+            />
+            <input
+                type="tel"
+                name="telephone"
+                value={form.telephone}
+                onChange={handleChange}
+                placeholder="Téléphone *"
+                className="border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500"
+            />
+            <input
+                type="email"
+                name="email"
+                value={form.email}
+                onChange={handleChange}
+                placeholder="Email *"
+                className="border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500"
+            />
+            <textarea
+                name="message"
+                value={form.message}
+                onChange={handleChange}
+                placeholder="Message (optionnel)"
+                className="border rounded-lg px-3 py-2 text-sm sm:col-span-2 lg:col-span-4 focus:ring-2 focus:ring-blue-500 resize-none"
+            />
+            <button
+                type="submit"
+                disabled={loading}
+                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200 font-semibold sm:col-span-2 lg:col-span-1"
+            >
+                {loading ? "Enregistrement..." : "Ajouter"}
+            </button>
+            {status && (
+                <p
+                    className={`text-sm sm:col-span-3 mt-2 ${status.includes("succès") ? "text-green-600" : "text-red-600"
+                        }`}
+                >
+                    {status}
+                </p>
+            )}
+        </form>
+    );
+}
+
 export default function AdminPage() {
     const router = useRouter();
     const [contacts, setContacts] = useState<Contact[]>([]);
@@ -151,33 +245,25 @@ export default function AdminPage() {
     const [errorText, setErrorText] = useState<string | null>(null);
     const [authChecked, setAuthChecked] = useState(false);
 
-    // ✅ Vérifie la session
     useEffect(() => {
         const checkAuth = async () => {
             const { data } = await supabase.auth.getSession();
-            if (!data.session) {
-                router.replace("/auth/login");
-            }
+            if (!data.session) router.replace("/auth/login");
             setAuthChecked(true);
         };
-
         checkAuth();
 
-        const {
-            data: { subscription },
-        } = supabase.auth.onAuthStateChange((_event, session) => {
+        const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
             if (!session) router.replace("/auth/login");
         });
 
         return () => {
-            subscription.unsubscribe();
+            listener?.subscription.unsubscribe();
         };
     }, [router]);
 
-    // ✅ Récupère les contacts si auth ok
     useEffect(() => {
         if (!authChecked) return;
-
         fetchContacts();
 
         const channel = supabase
@@ -195,13 +281,11 @@ export default function AdminPage() {
     const fetchContacts = async () => {
         setLoading(true);
         setErrorText(null);
-
         try {
             const { data, error } = await supabase
                 .from("contacts")
                 .select("id, nom, email, telephone, message, created_at")
                 .order("created_at", { ascending: false });
-
             if (error) throw error;
             setContacts(data || []);
         } catch {
@@ -224,7 +308,9 @@ export default function AdminPage() {
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-0 mb-6 sm:mb-8">
                             <div>
                                 <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold">Tableau de bord</h1>
-                                <p className="text-sm sm:text-base opacity-90 mt-1 sm:mt-2">Demandes reçues via le formulaire</p>
+                                <p className="text-sm sm:text-base opacity-90 mt-1 sm:mt-2">
+                                    Demandes reçues via le formulaire
+                                </p>
                             </div>
                             <SignOutButton />
                         </div>
@@ -236,9 +322,21 @@ export default function AdminPage() {
             <section className="py-8 sm:py-12 bg-gray-50">
                 <div className="container mx-auto px-4 sm:px-6 max-w-7xl">
                     <div className="bg-white rounded-xl shadow-lg">
+
+                        {/* ✅ Formulaire manuel */}
+                        <div className="p-4 sm:p-6 border-b bg-gray-50">
+                            <h3 className="text-lg font-semibold text-gray-800 mb-3">
+                                Ajouter une demande manuellement
+                            </h3>
+                            <ManualAddForm onAdded={fetchContacts} />
+                        </div>
+
                         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 sm:p-6 border-b gap-2 sm:gap-0">
                             <h2 className="text-lg sm:text-2xl font-bold text-gray-900">
-                                Demandes de contact <span className="ml-1 sm:ml-2 text-gray-500 text-sm sm:text-base">({contacts.length})</span>
+                                Demandes de contact{" "}
+                                <span className="ml-1 sm:ml-2 text-gray-500 text-sm sm:text-base">
+                                    ({contacts.length})
+                                </span>
                             </h2>
                             <button
                                 onClick={fetchContacts}
@@ -256,7 +354,9 @@ export default function AdminPage() {
                             ) : loading ? (
                                 <div className="text-center py-8">Chargement...</div>
                             ) : contacts.length === 0 ? (
-                                <div className="text-center py-8 text-gray-500">Aucune demande pour le moment.</div>
+                                <div className="text-center py-8 text-gray-500">
+                                    Aucune demande pour le moment.
+                                </div>
                             ) : (
                                 <table className="min-w-[600px] w-full table-auto text-sm sm:text-base">
                                     <thead className="bg-blue-600 text-white">
@@ -273,13 +373,19 @@ export default function AdminPage() {
                                             <tr key={c.id} className="border-b">
                                                 <td className="px-4 py-2">{c.nom}</td>
                                                 <td className="px-4 py-2">
-                                                    <a href={`tel:${c.telephone}`} className="text-blue-600 hover:underline">{c.telephone}</a>
+                                                    <a href={`tel:${c.telephone}`} className="text-blue-600 hover:underline">
+                                                        {c.telephone}
+                                                    </a>
                                                 </td>
                                                 <td className="px-4 py-2">
-                                                    <a href={`mailto:${c.email}`} className="text-blue-600 hover:underline">{c.email}</a>
+                                                    <a href={`mailto:${c.email}`} className="text-blue-600 hover:underline">
+                                                        {c.email}
+                                                    </a>
                                                 </td>
                                                 <td className="px-4 py-2">{c.message || "—"}</td>
-                                                <td className="px-4 py-2 text-gray-500 text-xs sm:text-sm">{new Date(c.created_at).toLocaleString("fr-FR")}</td>
+                                                <td className="px-4 py-2 text-gray-500 text-xs sm:text-sm">
+                                                    {new Date(c.created_at).toLocaleString("fr-FR")}
+                                                </td>
                                             </tr>
                                         ))}
                                     </tbody>
