@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
     BarChart,
     Bar,
@@ -23,7 +23,6 @@ type Contact = {
     created_at: string;
 };
 
-// Composant Stats avec animations
 const Stats = () => {
     const [stats, setStats] = useState({ today: 0, week: 0, year: 0, total: 0 });
     const [monthlyData, setMonthlyData] = useState<{ mois: string; total: number }[]>([]);
@@ -112,7 +111,7 @@ const Stats = () => {
             <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 border border-gray-100 animate-pulse">
                 <div className="h-6 bg-gray-200 rounded w-1/3 mb-6"></div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-                    {[...Array(4)].map((_, i) => (
+                    {[1, 2, 3, 4].map((i) => (
                         <div key={i} className="bg-gray-100 p-6 rounded-xl h-24"></div>
                     ))}
                 </div>
@@ -122,10 +121,10 @@ const Stats = () => {
     }
 
     const statsConfig = [
-        { title: "Demandes du jour", value: animatedStats.today, icon: Calendar, color: "blue", bgColor: "bg-blue-50", textColor: "text-blue-600", numberColor: "text-blue-800", borderColor: "border-blue-200" },
-        { title: "Cette semaine", value: animatedStats.week, icon: TrendingUp, color: "emerald", bgColor: "bg-emerald-50", textColor: "text-emerald-600", numberColor: "text-emerald-800", borderColor: "border-emerald-200" },
-        { title: "Cette année", value: animatedStats.year, icon: BarChart3, color: "purple", bgColor: "bg-purple-50", textColor: "text-purple-600", numberColor: "text-purple-800", borderColor: "border-purple-200" },
-        { title: "Total", value: animatedStats.total, icon: Users, color: "orange", bgColor: "bg-orange-50", textColor: "text-orange-600", numberColor: "text-orange-800", borderColor: "border-orange-200" }
+        { title: "Demandes du jour", value: animatedStats.today, icon: Calendar, bgColor: "bg-blue-50", textColor: "text-blue-600", numberColor: "text-blue-800", borderColor: "border-blue-200", dotColor: "bg-blue-400" },
+        { title: "Cette semaine", value: animatedStats.week, icon: TrendingUp, bgColor: "bg-emerald-50", textColor: "text-emerald-600", numberColor: "text-emerald-800", borderColor: "border-emerald-200", dotColor: "bg-emerald-400" },
+        { title: "Cette année", value: animatedStats.year, icon: BarChart3, bgColor: "bg-purple-50", textColor: "text-purple-600", numberColor: "text-purple-800", borderColor: "border-purple-200", dotColor: "bg-purple-400" },
+        { title: "Total", value: animatedStats.total, icon: Users, bgColor: "bg-orange-50", textColor: "text-orange-600", numberColor: "text-orange-800", borderColor: "border-orange-200", dotColor: "bg-orange-400" }
     ];
 
     return (
@@ -148,7 +147,7 @@ const Stats = () => {
                         >
                             <div className="flex items-center justify-between mb-3">
                                 <IconComponent className={`w-5 h-5 sm:w-6 sm:h-6 ${stat.textColor}`} />
-                                <div className={`w-2 h-2 ${stat.bgColor === 'bg-blue-50' ? 'bg-blue-400' : stat.bgColor === 'bg-emerald-50' ? 'bg-emerald-400' : stat.bgColor === 'bg-purple-50' ? 'bg-purple-400' : 'bg-orange-400'} rounded-full pulse-dot`}></div>
+                                <div className={`w-2 h-2 ${stat.dotColor} rounded-full pulse-dot`}></div>
                             </div>
                             <p className={`${stat.textColor} font-semibold text-xs sm:text-sm mb-2`}>{stat.title}</p>
                             <p className={`text-2xl sm:text-3xl font-bold ${stat.numberColor}`}>{stat.value}</p>
@@ -179,28 +178,12 @@ const Stats = () => {
             </div>
 
             <style jsx>{`
-                .stat-card {
-                    animation: fadeInUp 0.6s ease-out forwards;
-                    opacity: 0;
-                }
-                @keyframes fadeInUp {
-                    from { opacity: 0; transform: translateY(30px); }
-                    to { opacity: 1; transform: translateY(0); }
-                }
-                .pulse-dot {
-                    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-                }
-                @keyframes pulse {
-                    0%, 100% { opacity: 1; }
-                    50% { opacity: 0.5; }
-                }
-                .hover-lift {
-                    transition: transform 0.3s ease, box-shadow 0.3s ease;
-                }
-                .hover-lift:hover {
-                    transform: translateY(-4px);
-                    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-                }
+                .stat-card { animation: fadeInUp 0.6s ease-out forwards; opacity: 0; }
+                @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+                .pulse-dot { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+                @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+                .hover-lift { transition: transform 0.3s ease, box-shadow 0.3s ease; }
+                .hover-lift:hover { transform: translateY(-4px); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); }
             `}</style>
         </div>
     );
@@ -238,36 +221,7 @@ export default function AdminPage() {
     const [showForm, setShowForm] = useState(false);
     const [formData, setFormData] = useState({ nom: "", email: "", telephone: "", message: "" });
 
-    useEffect(() => {
-        const checkAuth = async () => {
-            const { data } = await supabase.auth.getSession();
-            if (!data.session) router.replace("/auth/login");
-            setAuthChecked(true);
-        };
-        checkAuth();
-
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-            if (!session) router.replace("/auth/login");
-        });
-
-        return () => subscription.unsubscribe();
-    }, [router]);
-
-    useEffect(() => {
-        if (!authChecked) return;
-        fetchContacts();
-
-        const channel = supabase
-            .channel("contacts-changes")
-            .on("postgres_changes", { event: "INSERT", schema: "public", table: "contacts" }, (payload) => {
-                setContacts((prev) => [payload.new as Contact, ...prev]);
-            })
-            .subscribe();
-
-        return () => supabase.removeChannel(channel);
-    }, [authChecked]);
-
-    const fetchContacts = async () => {
+    const fetchContacts = useCallback(async () => {
         setLoading(true);
         setErrorText(null);
         try {
@@ -283,7 +237,42 @@ export default function AdminPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
+
+    useEffect(() => {
+        const checkAuth = async () => {
+            const { data } = await supabase.auth.getSession();
+            if (!data.session) {
+                router.replace("/auth/login");
+            } else {
+                setAuthChecked(true);
+            }
+        };
+        checkAuth();
+
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+            if (!session) router.replace("/auth/login");
+        });
+
+        return () => subscription.unsubscribe();
+    }, [router]);
+
+    useEffect(() => {
+        if (!authChecked) return;
+
+        fetchContacts();
+
+        const channel = supabase
+            .channel("contacts-changes")
+            .on("postgres_changes", { event: "INSERT", schema: "public", table: "contacts" }, (payload) => {
+                setContacts((prev) => [payload.new as Contact, ...prev]);
+            })
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
+    }, [authChecked, fetchContacts]);
 
     const handleSubmit = async () => {
         if (!formData.nom || !formData.email || !formData.telephone) {
@@ -300,18 +289,19 @@ export default function AdminPage() {
         }
     };
 
-    if (!authChecked) return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
-            <div className="text-center">
-                <RefreshCw className="w-12 h-12 text-blue-500 animate-spin mx-auto mb-4" />
-                <p className="text-gray-600 font-medium">Vérification de l'authentification...</p>
+    if (!authChecked) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
+                <div className="text-center">
+                    <RefreshCw className="w-12 h-12 text-blue-500 animate-spin mx-auto mb-4" />
+                    <p className="text-gray-600 font-medium">Vérification de l'authentification...</p>
+                </div>
             </div>
-        </div>
-    );
+        );
+    }
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50">
-            {/* Header */}
             <section className="relative py-6 sm:py-12 md:py-16 text-white overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800"></div>
                 <div className="absolute inset-0">
@@ -337,7 +327,6 @@ export default function AdminPage() {
                 </div>
             </section>
 
-            {/* Tableau contacts */}
             <section className="py-8 sm:py-12 md:py-16 -mt-10 relative z-20">
                 <div className="container mx-auto px-4 sm:px-6 max-w-7xl">
                     <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden hover-lift">
@@ -427,7 +416,6 @@ export default function AdminPage() {
                                 </div>
                             ) : (
                                 <>
-                                    {/* Desktop */}
                                     <div className="hidden lg:block">
                                         <table className="w-full">
                                             <thead>
@@ -453,7 +441,6 @@ export default function AdminPage() {
                                         </table>
                                     </div>
 
-                                    {/* Mobile */}
                                     <div className="lg:hidden space-y-4">
                                         {contacts.map((c, i) => (
                                             <div key={c.id} className="bg-gradient-to-r from-white to-gray-50 border rounded-2xl p-4 shadow-sm hover:shadow-lg transition-all mobile-card" style={{ animationDelay: `${i * 100}ms` }}>
@@ -490,7 +477,6 @@ export default function AdminPage() {
                 </div>
             </section>
 
-            {/* Stats */}
             <section className="py-8 sm:py-12 md:py-16">
                 <div className="container mx-auto px-4 sm:px-6 max-w-7xl">
                     <Stats />
