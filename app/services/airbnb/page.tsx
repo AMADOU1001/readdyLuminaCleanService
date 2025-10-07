@@ -55,14 +55,12 @@ export default function AirbnbCleaning() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50">
       {/* Hero Section */}
-      <section className="relative py-16 md:py-20 lg:py-24 text-white overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800"></div>
-
-        {/* Animated background */}
-        <div className="absolute inset-0">
-          <div className="absolute top-20 left-20 w-72 h-72 bg-blue-400 rounded-full opacity-10 animate-pulse"></div>
-          <div className="absolute bottom-20 right-20 w-96 h-96 bg-indigo-400 rounded-full opacity-10 animate-pulse" style={{ animationDelay: '1s' }}></div>
-        </div>
+      <section
+        className="relative py-16 md:py-20 lg:py-24 text-white overflow-hidden bg-cover bg-center bg-no-repeat"
+        style={{
+          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('https://readdy.ai/api/search-image?query=Two%20professional%20female%20cleaners%20preparing%20Airbnb%20bedroom%20with%20fresh%20white%20linens%2C%20women%20in%20cleaning%20uniforms%20making%20bed%20together%2C%20housekeeping%20ladies%20arranging%20pillows%20and%20bedding%20in%20modern%20bright%20apartment%20bedroom%2C%20two%20women%20cleaning%20staff%20setting%20up%20pristine%20guest%20room%2C%20female%20cleaning%20team%20working%20together%20in%20well-lit%20spacious%20bedroom%20with%20white%20walls%20and%20natural%20lighting%2C%20professional%20housekeeping%20service%20preparing%20luxury%20accommodation&width=1200&height=600&seq=airbnb-hero-clean&orientation=landscape')`
+        }}
+      >
 
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-4xl mx-auto text-center">
