@@ -159,7 +159,7 @@ export default function Home() {
       <section
         className="relative min-h-screen flex items-center justify-center text-white overflow-hidden bg-cover bg-center bg-no-repeat"
         style={{
-          backgroundImage: 'url(https://images.unsplash.com/photo-1600585154526-990dced4db0d?w=1920&h=1080&fit=crurl(https://images.unsplash.com/photo-1600585154526-990dced4db0d?w=1920&h=1080&fit=crop)',
+          backgroundImage: 'url(https://images.unsplash.com/photo-1600585154526-990dced4db0d?w=1920&h=1080&fit=crop)',
         }}
       >
         <div className="absolute inset-0 bg-gradient-to-br from-blue-900/70 via-blue-800/60 to-indigo-900/70"></div>
